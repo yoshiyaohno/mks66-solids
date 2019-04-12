@@ -16,12 +16,14 @@ data DrawMats =
               }
 
 emptyDM :: DrawMats
-emptyDM = DrawMats { getScreen = emptyScreen blk (499,499)
-                   , getTStack = [ident]
---                 , getZBuf   = 
---                 , getEdges = []
---                 , getTriangles = []
-                   }
+emptyDM = DrawMats
+    { getScreen = emptyScreen blk (499,499)
+    , getTStack = [ident]
+    , getZBuf   = array ((0,0),(499,499))
+        [((x,y), 2**1024) | x <- [0..499], y <- [0..499]]
+--  , getEdges = []
+--  , getTriangles = []
+    }
 
 modScreen :: (Screen -> Screen) -> DrawMats -> DrawMats
 modScreen f dm = dm { getScreen = f $ getScreen dm }

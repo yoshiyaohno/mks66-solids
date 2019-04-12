@@ -5,6 +5,13 @@ import Data.Array.Unboxed --hmm
 import Control.Applicative
 import qualified Data.List as L
 
+-- FUTURE CODE RESTRUCTURING IDEA: make the line-drawers just return the
+--      association list, deal with actually updating the screen on the Screen
+--      end. There's no real reason this should have to import Screen (or array)
+--      I think.
+--          (alt: have an updateScreen function that Screen exports but that's
+--           literally what \\ is for so I dunno about that one)
+
 data Line a = Line (Vect a) (Vect a) deriving (Show)
 data Vect a = Vect { getX::a
                    , getY::a
@@ -47,6 +54,15 @@ drawLine c ln s =
 drawEdges :: (RealFrac a) => Color -> [Vect a] -> Screen -> Screen
 drawEdges c =
     foldr (.) id . map (drawLine c . uncurry Line) . pairOff . (map.fmap) round 
+
+rtf :: (Real a, Fractional b) => a -> b
+rtf = realToFrac
+
+lineHelper :: (Enum a, Real a, Fractional b) => (a,a) -> (a,a) -> [(a,b)]
+lineHelper (x0,y0) (x1,y1) =
+    [(x + x0, (rtf x)*(rtf dy)/(rtf dx) + (rtf y0)) | x <- [0..dx]]
+        where dy = y1 - y0
+              dx = x1 - x0
 
 addLine :: Line a -> [Vect a] -> [Vect a]
 addLine (Line p0 p1) = ([p0, p1] ++)
