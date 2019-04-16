@@ -9,7 +9,8 @@ newtype Triangle a = Triangle (Vect a, Vect a, Vect a) deriving (Show, Eq)
 
 drawTriangle :: Color -> Triangle Double -> Screen -> Screen
 drawTriangle c t = draw
-    [((round $ getX px, round $ getY px), c) | px <- scanTriangle t]
+    [((floor $ (0.0002 + getX px), floor $ (0.0002 + getY px)), c)
+        | px <- scanTriangle t]
     
 lh :: (Enum a, Fractional a) => (Vect a -> a) -> Vect a -> Vect a -> [Vect a]
 lh = lineHelper
@@ -19,7 +20,8 @@ scanTriangle (Triangle (a, b, c)) = let
     [top, mid, bot] = L.sortOn getY [a, b, c]
     e1 = lh getY top bot
     e2 = lh getY mid bot ++ lh getY top mid
-    in concat $ zipWith (lh getX) e1 e2
+    es = if (getX mid) < (getX top) then zip e2 e1 else zip e1 e2
+    in concat $ map (uncurry $ lh getX) es
 
     --in concat $ zipWith (lh getX) e1 e2
 --  es = if (getX mid) < (getX top) then zip e2 e1 else zip e1 e2
@@ -31,8 +33,13 @@ toEdges :: Triangle a -> [Line a]
 toEdges (Triangle (a, b, c)) = [Line a b, Line b c, Line a c]
 
 drawTriangles :: Color -> [Triangle Double] -> Screen -> Screen
-drawTriangles c =
-    foldr (.) id . map (drawLine c . fmap round) . concat . map toEdges . bfCull
+drawTriangles c = foldr (.) id . zipWith drawTriangle
+    (cycle [red, grn, blu, wht]) . bfCull
+
+--drawTriangles :: Color -> [Triangle Double] -> Screen -> Screen
+--drawTriangles c =
+--    foldr (.) id . map (drawLine c . fmap round)
+--        . concat . map toEdges . bfCull
 
 bfCull :: (Num a, Ord a) => [Triangle a] -> [Triangle a]
 bfCull = filter ((>0) . getZ . normal)
