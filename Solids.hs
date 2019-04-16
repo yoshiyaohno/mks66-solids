@@ -9,7 +9,7 @@ newtype Triangle a = Triangle (Vect a, Vect a, Vect a) deriving (Show, Eq)
 
 drawTriangle :: Color -> Triangle Double -> Screen -> Screen
 drawTriangle c t = draw
-    [((floor $ (0.0002 + getX px), floor $ (0.0002 + getY px)), c)
+    [((round $ (0.0002 + getX px), round $ (0.0002 + getY px)), c)
         | px <- scanTriangle t]
     
 lh :: (Enum a, Fractional a) => (Vect a -> a) -> Vect a -> Vect a -> [Vect a]
