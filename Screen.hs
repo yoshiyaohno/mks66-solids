@@ -11,6 +11,7 @@ type Color = Int32
 draw :: [((Int,Int), Color)] -> Screen -> Screen 
 draw l s = s // (filter (inRange (bounds s) . fst) l)
 
+wht = color 255 255 255
 blk = color 0 0 0
 red = color 255 0 0
 blu = color 0 0 255
