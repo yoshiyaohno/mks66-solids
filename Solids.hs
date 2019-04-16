@@ -7,9 +7,25 @@ import qualified Data.List as L
 
 newtype Triangle a = Triangle (Vect a, Vect a, Vect a) deriving (Show, Eq)
 
---DrawTriangle :: Color -> Triangle Double -> Screen -> Screen
---DrawTriangle c t = let
+drawTriangle :: Color -> Triangle Double -> Screen -> Screen
+drawTriangle c t = draw
+    [((round $ getX px, round $ getY px), c) | px <- scanTriangle t]
     
+lh :: (Enum a, Fractional a) => (Vect a -> a) -> Vect a -> Vect a -> [Vect a]
+lh = lineHelper
+
+scanTriangle :: (Enum a, Fractional a, Ord a) => Triangle a -> [Vect a]
+scanTriangle (Triangle (a, b, c)) = let
+    [top, mid, bot] = L.sortOn getY [a, b, c]
+    e1 = lh getY top bot
+    e2 = lh getY mid bot ++ lh getY top mid
+    in concat $ zipWith (lh getX) e1 e2
+
+    --in concat $ zipWith (lh getX) e1 e2
+--  es = if (getX mid) < (getX top) then zip e2 e1 else zip e1 e2
+--  in concat $ map (uncurry $ jelp getX) es
+        
+--  lh (getY top, getY bot) (getX top, getX bot)
 
 toEdges :: Triangle a -> [Line a]
 toEdges (Triangle (a, b, c)) = [Line a b, Line b c, Line a c]

@@ -42,14 +42,20 @@ instance Foldable Vect where
     foldr f acc (Vect x0 x1 x2 x3) =
         foldr f acc [x0, x1, x2, x3]
 
+lineHelper :: (Enum a, Fractional a) => 
+    (Vect a -> a) -> Vect a -> Vect a -> [Vect a]
+lineHelper f v0 v1 = map (lerp v0 v1) [0, (1/(f v1 - f v0)) .. 1]
+
+lerp :: (Num a) => Vect a -> Vect a -> a -> Vect a
+lerp v0 v1 = (((liftA2 (\a b t -> a*t + b*(1 - t))) v0 v1) <*>).pure
+--lerp v0 v1 t = (+) <$> ((*) <$> v0 <*> pure t) 
+
 crossProd :: (Num a) => Vect a -> Vect a -> Vect a
 crossProd (Vect x0 y0 z0 _) (Vect x1 y1 z1 _)
     = (Vect (y0*z1 - z0*y1) (x0*z1 - x1*z0) (x0*y1 - y0*x1) 1)
 
 drawLine :: Color -> Line Int -> Screen -> Screen
-drawLine c ln s =
-    s // [((getX px, getY px), c) | px <- rasterLine ln,
-        inRange (bounds s) (getX px, getY px)]
+drawLine c ln = draw [((getX px, getY px), c) | px <- rasterLine ln]
 
 drawEdges :: (RealFrac a) => Color -> [Vect a] -> Screen -> Screen
 drawEdges c =
@@ -58,11 +64,11 @@ drawEdges c =
 rtf :: (Real a, Fractional b) => a -> b
 rtf = realToFrac
 
-lineHelper :: (Enum a, Real a, Fractional b) => (a,a) -> (a,a) -> [(a,b)]
-lineHelper (x0,y0) (x1,y1) =
-    [(x + x0, (rtf x)*(rtf dy)/(rtf dx) + (rtf y0)) | x <- [0..dx]]
-        where dy = y1 - y0
-              dx = x1 - x0
+--lineHelper :: (Enum a, Real a, Fractional b) => (a,a) -> (a,a) -> [(a,b)]
+--lineHelper (x0,y0) (x1,y1) =
+--    [(x + x0, (rtf x)*(rtf dy)/(rtf dx) + (rtf y0)) | x <- [0..dx]]
+--        where dy = y1 - y0
+--              dx = x1 - x0
 
 addLine :: Line a -> [Vect a] -> [Vect a]
 addLine (Line p0 p1) = ([p0, p1] ++)
@@ -85,6 +91,9 @@ pairOff :: [a] -> [(a, a)]
 pairOff []       = []
 pairOff (x:[])   = []
 pairOff (a:b:xs) = ((a,b) : pairOff xs)
+
+mapSnd :: (b -> c) -> (a, b) -> (a, c)
+mapSnd f (x,y) = (x, f y)
 
 rotate :: Int -> [a] -> [a]
 rotate _ [] = []

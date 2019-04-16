@@ -8,6 +8,9 @@ import Data.Array.Unboxed
 type Screen = UArray (Int, Int) Int32
 type Color = Int32
 
+draw :: [((Int,Int), Color)] -> Screen -> Screen 
+draw l s = s // (filter (inRange (bounds s) . fst) l)
+
 blk = color 0 0 0
 red = color 255 0 0
 blu = color 0 0 255
