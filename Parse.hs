@@ -64,24 +64,21 @@ box args = do
     dm <- get
     let [cx, cy, cz, w, h, d] = map read args
         tris = S.box cx cy cz w h d
-    modify . modScreen $ S.drawTriangles red $
-        map (S.trTriangle $ getTransform dm) tris
+    modify . modScreen $ S.drawTriangles red $ trTris dm tris
 
 sphere :: (MonadState DrawMats m) => Args -> m ()
 sphere args = do
     dm <- get
     let [cx, cy, cz, r] = map read args
         tris = S.sphere cx cy cz r
-    modify . modScreen $ S.drawTriangles red $
-        map (S.trTriangle $ getTransform dm) tris
+    modify . modScreen $ S.drawTriangles red $ trTris dm tris
     
 torus :: (MonadState DrawMats m) => Args -> m ()
 torus args = do
     dm <- get
     let [cx, cy, cz, r0, r1] = map read args
         tris = S.torus cx cy cz r0 r1
-    modify . modScreen $ S.drawTriangles red $
-        map (S.trTriangle $ getTransform dm) tris
+    modify . modScreen $ S.drawTriangles red $ trTris dm tris
 
 circle :: (MonadState DrawMats m) => Args -> m ()
 circle args = do

@@ -25,6 +25,9 @@ emptyDM = DrawMats
 --  , getTriangles = []
     }
 
+trTris :: DrawMats -> [Triangle Double] -> [Triangle Double]
+trTris dm = map (trTriangle $ getTransform dm)
+
 modScreen :: (Screen -> Screen) -> DrawMats -> DrawMats
 modScreen f dm = dm { getScreen = f $ getScreen dm }
 
