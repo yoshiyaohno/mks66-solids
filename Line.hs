@@ -42,9 +42,11 @@ instance Foldable Vect where
     foldr f acc (Vect x0 x1 x2 x3) =
         foldr f acc [x0, x1, x2, x3]
 
-lineHelper :: (Enum a, Fractional a) => 
+lineHelper :: (Eq a, Enum a, Fractional a) => 
     (Vect a -> a) -> Vect a -> Vect a -> [Vect a]
-lineHelper f v0 v1 = map (lerp v0 v1) [0, (1/(f v1 - f v0)) .. 1]
+lineHelper f v0 v1
+    | f v0 == f v1  = [v0]
+    | otherwise     = map (lerp v0 v1) [0, (1/(f v1 - f v0)) .. 1]
 
 lerp :: (Num a) => Vect a -> Vect a -> a -> Vect a
 lerp v0 v1 = (((liftA2 (\a b t -> a*t + b*(1 - t))) v0 v1) <*>).pure

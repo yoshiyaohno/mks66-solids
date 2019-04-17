@@ -17,10 +17,10 @@ data DrawMats =
 
 emptyDM :: DrawMats
 emptyDM = DrawMats
-    { getScreen = emptyScreen blk (499,499)
+    { getScreen = emptyScreen blk (500,500)
     , getTStack = [ident]
-    , getZBuf   = array ((0,0),(499,499))
-        [((x,y), 2**1024) | x <- [0..499], y <- [0..499]]
+    , getZBuf   = array ((0,0),(500,500))
+        [((x,y), 2**1024) | x <- [0..500], y <- [0..500]]
 --  , getEdges = []
 --  , getTriangles = []
     }

@@ -7,20 +7,24 @@ import qualified Data.List as L
 
 newtype Triangle a = Triangle (Vect a, Vect a, Vect a) deriving (Show, Eq)
 
+piStep :: Floating a => a
+piStep = pi/11
+
 drawTriangle :: Color -> Triangle Double -> Screen -> Screen
 drawTriangle c t = draw
-    [((round $ (0.0002 + getX px), round $ (0.0002 + getY px)), c)
+    [((round $ getX px, round $ getY px), c)
         | px <- scanTriangle t]
     
-lh :: (Enum a, Fractional a) => (Vect a -> a) -> Vect a -> Vect a -> [Vect a]
+lh :: (Eq a, Enum a, Fractional a) =>
+    (Vect a -> a) -> Vect a -> Vect a -> [Vect a]
 lh = lineHelper
 
 scanTriangle :: (Enum a, Fractional a, Ord a) => Triangle a -> [Vect a]
 scanTriangle (Triangle (a, b, c)) = let
     [top, mid, bot] = L.sortOn getY [a, b, c]
     e1 = lh getY top bot
-    e2 = lh getY mid bot ++ lh getY top mid
-    es = if (getX mid) < (getX top) then zip e2 e1 else zip e1 e2
+    e2 = lh getY mid bot ++ tail (lh getY top mid)
+    es = if (getX $ e2!!1) < (getX $ e1!!1) then zip e2 e1 else zip e1 e2
     in concat $ map (uncurry $ lh getX) es
 
     --in concat $ zipWith (lh getX) e1 e2
@@ -54,14 +58,15 @@ sphere :: (Floating a, Enum a) => a -> a -> a -> a -> [Triangle a]
 sphere cx cy cz r = concat $ zipWith stitchLines (rotate 1 arcs) arcs
     where arcs = [[Vect (cx + r * cos thet) (cy + r * sin thet * cos phi)
                  (cz + r * sin thet * sin phi) 1
-                    | thet <- [0, pi/12 .. pi]] |  phi <- [0, pi/6 .. 2*pi]]
+                 | thet <- [0, piStep .. pi]] | phi <- [0, 2*piStep .. 2*pi]]
 
 torus :: (Floating a, Enum a) => a -> a -> a -> a -> a -> [Triangle a]
 torus cx cy cz r0 r1 = concat $ zipWith stitchLines arcs (rotate 1 arcs)
     where arcs = [[Vect (cx + r0 * cos thet * cos phi + r1 * cos phi)
                   (cy + r0 * sin thet)
                   (cz - sin phi * (r0 * cos thet + r1)) 1
-                    | thet <- [0, pi/6 .. 2*pi]] | phi <- [0, pi/6 .. 2*pi]]
+                  | thet <- [0, 2*piStep .. 2*pi]]
+                  | phi <- [0, 2*piStep .. 2*pi]]
 
 box :: (Floating a, Enum a) => a -> a -> a -> a -> a -> a -> [Triangle a]
 box cx cy cz w h d = let
