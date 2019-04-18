@@ -1,45 +1,17 @@
 rotate
-x -20
+y 30
 rotate
-y 20
-
+x 10
 push
+
 move
-100 100 0
-rotate
-x -10
-rotate
-z 10
+250 250 0
 
-box
-0 0 -35 70 70 70 
+sphere
+0 0 0 140
+#torus
+#0 0 0 50 200
 display
 
-push
-move
-100 100 0
-rotate
-x -10
-rotate
-z 10
-
-box
-0 0 -35 70 70 70 
-display
-
-push
-move
-100 100 0
-rotate
-x -10
-rotate
-z 10
-
-box
-0 0 -35 70 70 70 
-display
-
-box
-50 50 -25 50 50 50 
-
-display
+save
+spher.png

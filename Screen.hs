@@ -5,11 +5,15 @@ import Data.Bits
 import Data.Int
 import Data.Array.Unboxed
 
-type Screen = UArray (Int, Int) Int32
-type Color = Int32
+type ZBuf   = UArray (Int, Int) Double
+type Screen = UArray (Int, Int) Color
+type Color  = Int32
 
 draw :: [((Int,Int), Color)] -> Screen -> Screen 
 draw l s = s // (filter (inRange (bounds s) . fst) l)
+
+modZB :: [((Int, Int), Double)] -> ZBuf -> ZBuf
+modZB l s = s // (filter (inRange (bounds s) . fst) l)
 
 wht = color 255 255 255
 blk = color 0 0 0
@@ -30,11 +34,15 @@ getR = (`shiftR` 16)
 
 {-# INLINE getG #-}
 getG :: Color -> Color
-getG = ((.&.) 0b11111111) . (`shiftR` 8)
+getG = (.&. 0b11111111) . (`shiftR` 8)
 
 {-# INLINE getB #-}
 getB :: Color -> Color
 getB = (.&. 0b11111111)
+
+emptyZB :: (Int, Int) -> ZBuf
+emptyZB (w,h) = array ((0,0),(w,h))
+        [((x,y), 2**1024) | x <- [0..w], y <- [0..h]]
 
 emptyScreen :: Color -> (Int, Int) -> Screen
 emptyScreen c (w,h) =

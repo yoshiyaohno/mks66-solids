@@ -1,36 +1,54 @@
+{-# LANGUAGE FlexibleContexts #-}
 module Solids where
 
 import Line
 import Screen
 import Transform
 import qualified Data.List as L
+import Control.Monad.State
+import Data.Array.Unboxed
 
 newtype Triangle a = Triangle (Vect a, Vect a, Vect a) deriving (Show, Eq)
+data Pixel = Pixel
+    { pgetX :: Int
+    , pgetY :: Int
+    , pgetZ :: Double
+    }
+
+--plotPx :: MonadState ZBuf m => Pixel -> m (Maybe Pixel)
+--plotPx (Pixel x y z) = do
+--    zb <- get
+--    if z < zb!(x,y)
+--        then do modify $ modZB [((x,y), z)]
+--                return (Just $ Pixel x y z)
+--        else return Nothing
 
 piStep :: Floating a => a
 piStep = pi/11
+--piStep = pi/30
 
 drawTriangle :: Color -> Triangle Double -> Screen -> Screen
 drawTriangle c t = draw
-    [((round $ getX px, round $ getY px), c)
+    [((pgetX px, pgetY px), c)
         | px <- scanTriangle t]
     
 lh :: (Eq a, Enum a, Fractional a) =>
     (Vect a -> a) -> Vect a -> Vect a -> [Vect a]
 lh = lineHelper
 
-scanTriangle :: (Enum a, Fractional a, Ord a) => Triangle a -> [Vect a]
+scanTriangle :: Triangle Double -> [Pixel]
 scanTriangle (Triangle (a, b, c)) = let
     [top, mid, bot] = L.sortOn getY [a, b, c]
     e1 = lh getY top bot
     e2 = lh getY mid bot ++ tail (lh getY top mid)
-    es = if (getX $ e2!!1) < (getX $ e1!!1) then zip e2 e1 else zip e1 e2
-    in concat $ map (uncurry $ lh getX) es
-
+    es = if 2*(getX mid) <= (getX top + getX bot)
+            then zip e2 e1 else zip e1 e2
+    in  [Pixel (round.getX $ t) (round.getY $ t) (getZ t)
+            | t <- concat $ map (uncurry $ lh getX) es]
     --in concat $ zipWith (lh getX) e1 e2
 --  es = if (getX mid) < (getX top) then zip e2 e1 else zip e1 e2
 --  in concat $ map (uncurry $ jelp getX) es
-        
+
 --  lh (getY top, getY bot) (getX top, getX bot)
 
 toEdges :: Triangle a -> [Line a]

@@ -9,8 +9,8 @@ import Transform
 type Args = [String]
 data DrawMats =
      DrawMats { getScreen :: Screen
+              , getZBuf   :: ZBuf
               , getTStack :: [Transform Double]
-              , getZBuf   :: UArray (Int, Int) Double
 --            , getEdges :: [Vect Double]
 --            , getTriangles :: [Triangle Double]
               }
@@ -19,8 +19,7 @@ emptyDM :: DrawMats
 emptyDM = DrawMats
     { getScreen = emptyScreen blk (500,500)
     , getTStack = [ident]
-    , getZBuf   = array ((0,0),(500,500))
-        [((x,y), 2**1024) | x <- [0..500], y <- [0..500]]
+    , getZBuf   = emptyZB (500,500)
 --  , getEdges = []
 --  , getTriangles = []
     }
