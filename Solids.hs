@@ -65,13 +65,7 @@ scanTriangle (Triangle (a, b, c)) = let
     e2 = pixLiner mid top ++ tail (pixLiner bot mid)
     es = if 2*(pgetX mid) <= (pgetX top + pgetX bot)
             then zip e2 e1 else zip e1 e2
-            --then zip e1 e2 else zip e2 e1)
     in concatMap (uncurry pixScan) es
-    --in concat $ zipWith (lh getX) e1 e2
---  es = if (getX mid) < (getX top) then zip e2 e1 else zip e1 e2
---  in concat $ map (uncurry $ jelp getX) es
-
---  lh (getY top, getY bot) (getX top, getX bot)
 
 vdToPix :: Vect Double -> Pixel
 vdToPix (Vect x y z q) = Pixel (round x) (round y) z
