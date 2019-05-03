@@ -7,7 +7,7 @@ Main: Main.hs Parse.hs Transform.hs Line.hs Solids.hs Screen.hs DrawMats.hs
 build: Main
 
 clean:
-	rm *.hi *.o Main *.ppm *.png .tempimg.ppm
+	rm *.hi *.o Main .tempimg.ppm
 
 imgclean:
 	rm *.ppm *.png .tempimg.ppm
