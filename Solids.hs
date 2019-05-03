@@ -43,24 +43,27 @@ lh :: (Eq a, Enum a, Fractional a) =>
     (Vect a -> a) -> Vect a -> Vect a -> [Vect a]
 lh = lineHelper
 
-vdToPix :: Vect Double -> Pixel
-vdToPix (Vect x y z q) = Pixel (round x) (round y) z
+-- returns the vertical line between two pixels
+pixLiner :: Pixel -> Pixel -> [Pixel]
+pixLiner p0 p1 = map vdToPix (lh getY (pixToVd p0) (pixToVd p1))
+    -- ......
+    -- I give up.
 
+-- scans across a line of pixels (finding z values in between)
 pixScan :: Pixel -> Pixel -> [Pixel]
 pixScan (Pixel x0 y0 z0) (Pixel x1 y1 z1)
     | y0 /= y1  = error "mismatched y values in pixScan"
-    | dx == 0   = []
-    | otherwise = [Pixel x y0 ((fromIntegral x)*dz/(fromIntegral dx) + z0)
+    | dx == 0   = [Pixel x0 y0 z0]
+    | otherwise = [Pixel (x+x0) y0 ((fromIntegral x)*dz/(fromIntegral dx) + z0)
                   | x <- [0, (signum dx) .. dx]]
-    where dx = x1 - x0
-          dz = z1 - z0
+    where dx = x1 - x0; dz = z1 - z0
 
 scanTriangle :: Triangle Double -> [Pixel]
 scanTriangle (Triangle (a, b, c)) = let
-    [bot, mid, top] = L.sortOn getY [a, b, c]
-    e1 = map vdToPix (lh getY bot top)
-    e2 = map vdToPix (lh getY bot mid ++ tail (lh getY mid top))
-    es = if 2*(getX mid) <= (getX top + getX bot)
+    [bot, mid, top] = map vdToPix (L.sortOn getY [a, b, c])
+    e1 = pixLiner bot top
+    e2 = pixLiner mid top ++ tail (pixLiner bot mid)
+    es = if 2*(pgetX mid) <= (pgetX top + pgetX bot)
             then zip e2 e1 else zip e1 e2
             --then zip e1 e2 else zip e2 e1)
     in concatMap (uncurry pixScan) es
@@ -69,6 +72,12 @@ scanTriangle (Triangle (a, b, c)) = let
 --  in concat $ map (uncurry $ jelp getX) es
 
 --  lh (getY top, getY bot) (getX top, getX bot)
+
+vdToPix :: Vect Double -> Pixel
+vdToPix (Vect x y z q) = Pixel (round x) (round y) z
+-- why
+pixToVd :: Pixel -> Vect Double
+pixToVd (Pixel x y z) = Vect (fromIntegral x) (fromIntegral y) z 1
 
 toEdges :: Triangle a -> [Line a]
 toEdges (Triangle (a, b, c)) = [Line a b, Line b c, Line a c]
