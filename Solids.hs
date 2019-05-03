@@ -4,28 +4,35 @@ module Solids where
 import Line
 import Screen
 import Transform
-import qualified Data.List as L
+
+import Data.Maybe
 import Control.Monad.State
 import Data.Array.Unboxed
+import qualified Data.List  as L
+
+import Control.Exception
 
 newtype Triangle a = Triangle (Vect a, Vect a, Vect a) deriving (Show, Eq)
 data Pixel = Pixel
     { pgetX :: Int
     , pgetY :: Int
     , pgetZ :: Double
-    }
-
---plotPx :: MonadState ZBuf m => Pixel -> m (Maybe Pixel)
---plotPx (Pixel x y z) = do
---    zb <- get
---    if z < zb!(x,y)
---        then do modify $ modZB [((x,y), z)]
---                return (Just $ Pixel x y z)
---        else return Nothing
+    } deriving (Eq, Show)
 
 piStep :: Floating a => a
 piStep = pi/11
 --piStep = pi/30
+
+plotPxs :: (MonadState ZBuf m) => [Pixel] -> m [Pixel]
+plotPxs = fmap catMaybes . mapM plotPx
+
+plotPx :: MonadState ZBuf m => Pixel -> m (Maybe Pixel)
+plotPx (Pixel x y z) = do
+    zb <- get
+    if z < zb!(x,y)
+        then do modify $ modZB [((x,y), z)]
+                return (Just $ Pixel x y z)
+        else return Nothing
 
 drawTriangle :: Color -> Triangle Double -> Screen -> Screen
 drawTriangle c t = draw
@@ -36,15 +43,27 @@ lh :: (Eq a, Enum a, Fractional a) =>
     (Vect a -> a) -> Vect a -> Vect a -> [Vect a]
 lh = lineHelper
 
+vdToPix :: Vect Double -> Pixel
+vdToPix (Vect x y z q) = Pixel (round x) (round y) z
+
+pixScan :: Pixel -> Pixel -> [Pixel]
+pixScan (Pixel x0 y0 z0) (Pixel x1 y1 z1)
+    | y0 /= y1  = error "mismatched y values in pixScan"
+    | dx == 0   = []
+    | otherwise = [Pixel x y0 ((fromIntegral x)*dz/(fromIntegral dx) + z0)
+                  | x <- [0, (signum dx) .. dx]]
+    where dx = x1 - x0
+          dz = z1 - z0
+
 scanTriangle :: Triangle Double -> [Pixel]
 scanTriangle (Triangle (a, b, c)) = let
-    [top, mid, bot] = L.sortOn getY [a, b, c]
-    e1 = lh getY top bot
-    e2 = lh getY mid bot ++ tail (lh getY top mid)
+    [bot, mid, top] = L.sortOn getY [a, b, c]
+    e1 = map vdToPix (lh getY bot top)
+    e2 = map vdToPix (lh getY bot mid ++ tail (lh getY mid top))
     es = if 2*(getX mid) <= (getX top + getX bot)
             then zip e2 e1 else zip e1 e2
-    in  [Pixel (round.getX $ t) (round.getY $ t) (getZ t)
-            | t <- concat $ map (uncurry $ lh getX) es]
+            --then zip e1 e2 else zip e2 e1)
+    in concatMap (uncurry pixScan) es
     --in concat $ zipWith (lh getX) e1 e2
 --  es = if (getX mid) < (getX top) then zip e2 e1 else zip e1 e2
 --  in concat $ map (uncurry $ jelp getX) es
