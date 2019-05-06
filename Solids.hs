@@ -20,7 +20,7 @@ data Pixel = Pixel
     } deriving (Eq, Show)
 
 piStep :: Floating a => a
-piStep = pi/7
+piStep = pi/11
 --piStep = pi/30
 
 lightPx :: Pixel -> ((Int, Int), Color)
