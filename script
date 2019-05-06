@@ -6,8 +6,8 @@ x 10
 move
 250 250 500
 
-sphere
-0 0 0 140
+/sphere
+/0 0 0 140
 torus
 0 0 0 50 200
 display

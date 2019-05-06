@@ -1,4 +1,6 @@
 default: Main
+	@echo
+	@echo this is going to take a long time
 	./Main script
 
 Main: Main.hs Parse.hs Transform.hs Line.hs Solids.hs Screen.hs DrawMats.hs
