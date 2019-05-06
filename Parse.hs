@@ -53,6 +53,17 @@ parse (a:b:xs) =
                 Just c1 -> (c1 $ words b) : (parse xs)
                 Nothing -> parse (b:xs)
 
+drawTriangle :: (MonadState DrawMats m) => S.Triangle Double -> m ()
+drawTriangle tr = do
+    dm <- get
+    let pxs = S.scanTriangle tr
+        (toDraw, newZB) = runState (S.plotPxs pxs) (getZBuf dm)
+    put $ dm {getZBuf = newZB}
+    modify.modScreen $ draw (map S.lightPx toDraw)
+
+--drawTriangles :: (MonadState DrawMats m) => Triangle Double -> m ()
+--drawTriangles trs = do
+
 push :: (MonadState DrawMats m) => m ()
 push = modify pushTransform
 

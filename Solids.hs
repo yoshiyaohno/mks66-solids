@@ -23,6 +23,9 @@ piStep :: Floating a => a
 piStep = pi/11
 --piStep = pi/30
 
+lightPx :: Pixel -> ((Int, Int), Color)
+lightPx (Pixel x y z) = ((x, y), (color 128 0 ((round z) `mod` 255)))
+
 plotPxs :: (MonadState ZBuf m) => [Pixel] -> m [Pixel]
 plotPxs = fmap catMaybes . mapM plotPx
 
@@ -35,9 +38,8 @@ plotPx (Pixel x y z) = do
         else return Nothing
 
 drawTriangle :: Color -> Triangle Double -> Screen -> Screen
-drawTriangle c t = draw
-    [((pgetX px, pgetY px), c)
-        | px <- scanTriangle t]
+drawTriangle c t =
+    draw [((pgetX px, pgetY px), c) | px <- scanTriangle t]
     
 lh :: (Eq a, Enum a, Fractional a) =>
     (Vect a -> a) -> Vect a -> Vect a -> [Vect a]
