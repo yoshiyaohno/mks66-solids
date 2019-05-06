@@ -1,16 +1,15 @@
-rotate
-y 30
+/rotate
+/y 30
 rotate
 x 10
-push
 
 move
-250 250 0
+250 250 500
 
 sphere
 0 0 0 140
-#torus
-#0 0 0 50 200
+torus
+0 0 0 50 200
 display
 
 save

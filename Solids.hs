@@ -20,11 +20,11 @@ data Pixel = Pixel
     } deriving (Eq, Show)
 
 piStep :: Floating a => a
-piStep = pi/11
+piStep = pi/7
 --piStep = pi/30
 
 lightPx :: Pixel -> ((Int, Int), Color)
-lightPx (Pixel x y z) = ((x, y), (color 128 0 ((round z) `mod` 255)))
+lightPx (Pixel x y z) = ((x, y), color 0 0 (255 - round (z/3)))
 
 plotPxs :: (MonadState ZBuf m) => [Pixel] -> m [Pixel]
 plotPxs = fmap catMaybes . mapM plotPx
